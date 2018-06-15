@@ -1,0 +1,7 @@
+*.pyc
+
+information.py
+information.pyc
+
+*~
+.Rhistory
