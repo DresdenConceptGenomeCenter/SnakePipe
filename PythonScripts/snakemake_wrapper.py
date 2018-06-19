@@ -36,7 +36,10 @@ from argparse import RawDescriptionHelpFormatter
 
 from re import search
 
-import subprocess
+from subprocess import Popen
+from subprocess import PIPE
+from subprocess import CalledProcessError
+from subprocess import run
 
 
 
@@ -51,6 +54,7 @@ class Parser(object):
         self.__parser = ArgumentParser(description="""
         Wrapper function for the snakemake pipeline
         """, formatter_class=RawDescriptionHelpFormatter, 
+#         add_help = False, prog = 'snakemake_wrapper.py')
         add_help = False, prog = 'snakemake_wrapper.py')
         
         self.initialiseParser()
@@ -72,8 +76,8 @@ class Parser(object):
         self.parse()
 
     def initialiseParser(self):
-        self.__parser.add_argument('-h', '--help', dest = 'h', help = 'Display help message', action= 'store_true')
-        self.__parser.add_argument('-w', '--job-scheduler', dest='scheduler', metavar='STRING', choices = ('qsub', 'sbatch', 'drmaa', 'local'), required = True, help = 'job scheduler system')
+#         self.__parser.add_argument('-h', '--help', dest = 'h', help = 'Display help message', action= 'store_true')
+        self.__parser.add_argument('-w', '--job-scheduler', dest='scheduler', metavar='STRING', choices = ('qsub', 'sbatch', 'drmaa', 'local'), required = True, help = 'job scheduler system (qsub, sbatch, drmaa, local)')
         self.__parser.add_argument('-p', '--print', dest='cmd', help = 'print command and exit', action= 'store_true')
         
         
@@ -114,9 +118,9 @@ class Parser(object):
             self.__logger.critical(message)
 
     def main(self):
-        if self.__options.h:
-            self.__parser.print_help()
-            exit(0)
+#         if self.__options.h:
+#             self.__parser.print_help()
+#             exit(0)
         
         self.__scheduler = self.__options.scheduler
         self.__cmd = self.__options.cmd
@@ -187,12 +191,15 @@ class Parser(object):
             exit(0)
 
         try:
-            res = subprocess.run(self.__subcmd, check=True, shell=True, stdout=subprocess.PIPE)
-        except subprocess.CalledProcessError as e:
+            res = run(self.__subcmd, check=True, shell=True, stdout= PIPE, stderr = PIPE)
+#             res = Popen(self.__subcmd, stdout= PIPE, stderr= PIPE)
+        except CalledProcessError as e:
             raise e
     
+        stout, sterr = res.communicate()
+    
         try:
-            m = search("Submitted batch job (\d+)", res)
+            m = search("Submitted batch job (\d+)", sterr)
             jobid = m.group(1)
             print(jobid)
         except Exception as e:
