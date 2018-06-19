@@ -2,6 +2,7 @@
 *.swp
 information.py
 information.pyc
-
+snake_information.py
+snake_information.pyc
 *~
 .Rhistory

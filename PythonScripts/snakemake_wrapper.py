@@ -77,17 +77,27 @@ class Parser(object):
 
     def initialiseParser(self):
 #         self.__parser.add_argument('-h', '--help', dest = 'h', help = 'Display help message', action= 'store_true')
-        self.__parser.add_argument('-w', '--job-scheduler', dest='scheduler', metavar='STRING', choices = ('qsub', 'sbatch', 'drmaa', 'local'), required = True, help = 'job scheduler system (qsub, sbatch, drmaa, local)')
+#         self.__parser.add_argument('-w', '--job-scheduler', dest='scheduler', metavar='STRING', choices = ('qsub', 'sbatch', 'drmaa', 'local'), required = True, help = 'job scheduler system (qsub, sbatch, drmaa, local)')
         self.__parser.add_argument('-p', '--print', dest='cmd', help = 'print command and exit', action= 'store_true')
+#         self.__parser.add_argument('-f', '--workflow', dest = 'workflow', help = 'select a snakemake workflow')
         
         
         self.__wrapper = self.__parser.add_argument_group("snakemake specific arguments")
-#         self.__wrapper.add_argument('-d', '--drmaa', dest = 'use_drmaa', action = 'store_true', help = 'use DRMAA for submitting/controlling cluster jobs')
         self.__wrapper.add_argument('-n', '--dryrun', dest = 'dryrun', action = 'store_true', help = 'do not execute anything, and display what would be done')
         self.__wrapper.add_argument('-c', '--configfile', dest = 'configfile', metavar='FILE', type = str, help = 'configuration file needed to run the workflow')
         self.__wrapper.add_argument('-u', '--cluster-config', dest = 'clusterconfig', metavar='FILE', type = str, help = 'configuration file to specify required cluster resources')
         self.__wrapper.add_argument('-s', '--snakefile', dest = 'snakefile', metavar='FILE', type = str, help = 'the workflow definition in a snakefile')
         self.__wrapper.add_argument('-j', '--jobs', dest = 'jobs', metavar='INT', type = int, default = 1, help = 'run at most N jobs in parallel (default: 1)')
+        
+        self.__subparser = self.__parser.add_subparsers(help='sub-command help')
+        
+        self.__cmcbworkflow = self.__subparser.add_subparsers(title='CMCB workflows', description='snakemake workflows at CMCB', help='list workflows for snakemake pipeline at CMCB')
+        self.__cmcbworkflow.add_argument('-w', '--job-scheduler', dest = 'scheduler', metavar = 'STRING', choices = ('qsub', 'drmaa', 'local'), help = 'job scheduler system (sbatch, drmaa, local)')
+        self.__cmcbworkflow.add_argument('-f', '--flows', dest = 'flows', metavar = 'STRING', help = 'list workflows')
+
+        self.__zihworkflow = self.__subparser.add_subparsers(title='ZIH workflows', description='snakemake workflows at ZIH', help='list workflows for snakemake pipeline at ZIH')
+        self.__zihworkflow.add_argument('-w', '--job-scheduler', dest = 'scheduler', metavar = 'STRING', choices = ('sbatch', 'drmaa', 'local'), help = 'job scheduler system (sbatch, drmaa, local)')
+        self.__zihworkflow.add_argument('-f', '--flows', dest = 'flows', metavar = 'STRING', help = 'list workflows')
         
         
 #         --cluster-config FILE, -u FILE
@@ -116,6 +126,11 @@ class Parser(object):
             self.__logger.error(message)
         elif level == 'critical':
             self.__logger.critical(message)
+
+
+#     def show_workflow(self):
+#         if self.
+
 
     def main(self):
         #if self.__options.h:
