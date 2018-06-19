@@ -55,7 +55,7 @@ class Parser(object):
         Wrapper function for the snakemake pipeline
         """, formatter_class=RawDescriptionHelpFormatter, 
 #         add_help = False, prog = 'snakemake_wrapper.py')
-        add_help = False, prog = 'snakemake_wrapper.py')
+        add_help = True, prog = 'snakemake_wrapper.py')
         
         self.initialiseParser()
         self.__drmaa = '--drmaa'
@@ -118,9 +118,9 @@ class Parser(object):
             self.__logger.critical(message)
 
     def main(self):
-#         if self.__options.h:
-#             self.__parser.print_help()
-#             exit(0)
+        #if self.__options.h:
+        #    self.__parser.print_help()
+        #    exit(0)
         
         self.__scheduler = self.__options.scheduler
         self.__cmd = self.__options.cmd
@@ -189,22 +189,25 @@ class Parser(object):
         if self.__cmd:
             self.show_log('info', 'COMMAND: {0}'.format(self.__subcmd))
             exit(0)
-
         try:
             res = run(self.__subcmd, check=True, shell=True, stdout= PIPE, stderr = PIPE)
 #             res = Popen(self.__subcmd, stdout= PIPE, stderr= PIPE)
         except CalledProcessError as e:
             raise e
     
-        stout, sterr = res.communicate()
+        sterr = res.stderr.decode()
+        stdout = res.stdout.decode()
     
         try:
             m = search("Submitted batch job (\d+)", sterr)
             jobid = m.group(1)
-            print(jobid)
+        except AttributeError:
+            print(stdout)
+            self.show_log('info', 'COMMAND: {0}'.format(self.__subcmd))
         except Exception as e:
             print(e)
             raise
+
 
 if __name__ == '__main__':
     mainlog = MainLogger('snakemake')
